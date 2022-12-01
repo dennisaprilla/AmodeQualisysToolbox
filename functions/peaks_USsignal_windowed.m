@@ -1,4 +1,4 @@
-function [allpeaks, USsignals_corrbarker] = peaks_USsignal_windowed(data, data_spec, us_spec, windowrange, windowrange_i)
+function [allpeaks, USsignals_envelop, USsignals_corrbarker] = peaks_USsignal_windowed(data, data_spec, us_spec, windowrange, windowrange_i, path_barkercode)
 
 % preparing constants for peak detection
 minpeakwidth = 5;
@@ -6,35 +6,23 @@ minpeakprominence = 300;
 envelop_windowlength = 30;
 
 % pre-allocation variables, later can be deleted
-% USsignals_hpfilter = cell(data_spec.n_ust, data_spec.n_frames);
-% USsignals_envelop  = cell(data_spec.n_ust, data_spec.n_frames);
-% USsignals_lpfilter = cell(data_spec.n_ust, data_spec.n_frames);
 USsignals_tgcfilter  = cell(data_spec.n_ust, data_spec.n_frames);
 USsignals_bpfilter   = cell(data_spec.n_ust, data_spec.n_frames);
 USsignals_corrbarker = cell(data_spec.n_ust, data_spec.n_frames);
 USsignals_envelop    = cell(data_spec.n_ust, data_spec.n_frames);
-allpeaks.sharpness = zeros(data_spec.n_ust, data_spec.n_frames);
-allpeaks.locations = zeros(data_spec.n_ust, data_spec.n_frames);
+allpeaks.sharpness   = zeros(data_spec.n_ust, data_spec.n_frames);
+allpeaks.locations   = zeros(data_spec.n_ust, data_spec.n_frames);
 
 % construct the filter for TGC
 tgcFilt = tgc_simple(size(data,2), 2, 0.02, 1/us_spec.sample_rate);
 
 % construct the filter for highpass and lowpass
-% hpFilt = designfilt('highpassiir','FilterOrder',2, ...
-%          'PassbandFrequency',3.5e6,'PassbandRipple',0.2, ...
-%          'SampleRate', us_spec.sample_rate);
-% lpFilt = designfilt('lowpassiir','FilterOrder',2, ...
-%          'PassbandFrequency', 1e7,'PassbandRipple',0.3, ...
-%          'SampleRate', us_spec.sample_rate);
 bpFilt = designfilt('bandpassiir', 'FilterOrder', 20, ...
          'HalfPowerFrequency1', 0.3e7, 'HalfPowerFrequency2', 0.9e7, ...
          'SampleRate', us_spec.sample_rate);
      
 % construct the barkers code
-path_barkerscode = 'data';
-text_barkerscode = 'kenans_barkercode.txt';
-fullpath_barkerscode = strcat(path_barkerscode, filesep, text_barkerscode);
-barkerscode = readmatrix(fullpath_barkerscode);
+barkerscode = readmatrix(path_barkercode);
 
 % construct sigmoid filter
 sigFilt = sigmoid_simple(size(data,2), 1.5, 0.1, 1/us_spec.sample_rate);
@@ -44,6 +32,7 @@ t_dsp = zeros(data_spec.n_frames, 1);
 
 % put indicator to terminal
 disp("DSP is running, please wait ...");
+
 % show the progress bar, so that the user is not bored
 f = waitbar(0, sprintf('%d/%d Frame', 0, data_spec.n_frames), 'Name', 'Running DSP');
 
@@ -84,21 +73,7 @@ for j=1:data_spec.n_frames
         S_envelop = smoothdata(S_envelop, 'gaussian', 20);
         USsignals_envelop{i,j}  = S_envelop .* sigFilt_clipped;
         
-        %{
-        % 1) HP-filter because there is low frequency tendency from raw signal
-        USsignals_hpfilter{i,j} = filtfilt(hpFilt, data_clipped);
-        
-        % 2) enveloping the signal
-        USsignals_envelop{i,j} = envelope(USsignals_hpfilter{i,j}, envelop_windowlength, 'rms');
-        
-        % 3) LP-filter the envelop
-        USsignals_lpfilter{i,j} = filtfilt(lpFilt, USsignals_envelop{i,j});
-        
-        % 4) peak detection
-        [peaks, locs] =  findpeaks(USsignals_lpfilter{i,j}, 'SortStr', 'descend');
-        %}
-        
-        % 6) Local maxima detection
+        % 5) Local maxima detection
         [peaks, locs] =  findpeaks( USsignals_envelop{i,j}, ...
                                     'MinPeakWidth', minpeakwidth, ...
                                     'MinPeakProminence', minpeakprominence, ...
@@ -109,7 +84,15 @@ for j=1:data_spec.n_frames
         % produce an error
         if locs
             allpeaks.sharpness(i,j) = peaks(1);
-            allpeaks.locations(i,j) = windowrange(i, 1) + (locs(1) * us_spec.index2distance_constant);
+            % if the user specified index2time_constant we can provide
+            % information regarding peak in time
+            if (isfield(us_spec, 'index2time_constant'))
+                allpeaks.times(i,j) = windowrange(i, 1) + (locs(1) * us_spec.index2time_constant);
+            % if the user specified index2distance_constant we can provide
+            % information regarding peak in distance
+            elseif (isfield(us_spec, 'index2distance_constant'))
+                allpeaks.locations(i,j) = windowrange(i, 1) + (locs(1) * us_spec.index2distance_constant);
+            end
         end
         
     end

@@ -1,4 +1,4 @@
-function display_peak_amode(current_axes, allpeaks, probeNumber_toShow, timestamp_toShow, tag)
+function display_peak_amode(current_axes, allpeaks, display_mode, probeNumber_toShow, timestamp_toShow, tag)
 
 delete(findobj(current_axes, 'Tag', tag));
 
@@ -16,14 +16,26 @@ if (iscell(allpeaks.locations))
 % if the current_peaks is just one number, it means the user run an ultrasound 
 % signal processing with windowing.
 else
+
+    % % display peak with line
     % current_peaks = allpeaks.locations(probeNumber_toShow, timestamp_toShow);
     % xline(current_axes, current_peaks, '-', 'Color', '#EDB120', 'LineWidth', 1.5, 'Tag', tag);
 
-    current_peak_locations = allpeaks.locations(probeNumber_toShow, timestamp_toShow);
+    if (strcmp(display_mode, 'distance'))
+        current_peak = allpeaks.locations(probeNumber_toShow, timestamp_toShow);
+    elseif (strcmp(display_mode, 'time'))
+        current_peak = allpeaks.times(probeNumber_toShow, timestamp_toShow);
+    else
+        warning("Can not recognice the display mode for A-mode, specified as 'location' (found in display_peak_amode)");
+        current_peak = allpeaks.locations(probeNumber_toShow, timestamp_toShow);
+    end
+
+    % display peak with point
     current_peaks_sharpness = allpeaks.sharpness(probeNumber_toShow, timestamp_toShow);
     hold(current_axes, 'on');
-    plot(current_axes, current_peak_locations, current_peaks_sharpness, 'or',  'MarkerFaceColor', 'y', 'MarkerSize', 10, 'LineWidth', 2, 'Tag', tag );
+    plot(current_axes, current_peak, current_peaks_sharpness, 'or',  'MarkerFaceColor', 'y', 'MarkerSize', 10, 'LineWidth', 2, 'Tag', tag );
     hold(current_axes, 'off');
+    
 end
 
 end
