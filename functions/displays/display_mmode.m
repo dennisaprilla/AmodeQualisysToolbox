@@ -1,7 +1,7 @@
-function display_mmode_windowed(current_axes, probeNumber_toShow, envelope_data, data_spec, x_axis_values)
+function display_mmode(current_axes, probeNumber_toShow, envelope_data, data_spec, x_axis_values, mmode_display_threshold)
 
 % set the constant
-mmode_threshold = 15000;
+% mmode_display_threshold = 15000;
 compression_factor = 1;
 
 if (iscell(envelope_data))
@@ -17,7 +17,7 @@ else
     probe = reshape( envelope_data(probeNumber_toShow,:,:), [data_spec.n_samples, data_spec.n_frames]);
 end
 
-probe_image = uint8(255 * mat2gray(probe, [0 mmode_threshold]));
+probe_image = uint8(255 * mat2gray(probe, [0 mmode_display_threshold]));
 % probe_image = uint8(255 * mat2gray(probe));
 % log_compression = 10 * log10( (compression_factor * probe) + eps);
 % probe_image = uint8(255 * mat2gray(log_compression));

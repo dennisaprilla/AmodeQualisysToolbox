@@ -21,7 +21,7 @@ if(~isempty(envelope_data))
 % the signal flat, so let's cut the y limit
 else
     y_limit = [min(raw_data(probeNumber_toShow, :, timestamp_toShow)), ...
-               max(raw_data(probeNumber_toShow, :, timestamp_toShow)) / 3];
+               max(raw_data(probeNumber_toShow, :, timestamp_toShow))];
 end
 ylim(current_axes, y_limit);
 
