@@ -26,7 +26,7 @@ else
     elseif (strcmp(display_mode, 'time'))
         current_peak = allpeaks.times(probeNumber_toShow, timestamp_toShow);
     else
-        warning("Can not recognice the display mode for A-mode, specified as 'location' (found in display_peak_amode)");
+        warning("Can not recognize the display mode for A-mode, specified as 'location' (found in display_peak_amode)");
         current_peak = allpeaks.locations(probeNumber_toShow, timestamp_toShow);
     end
 

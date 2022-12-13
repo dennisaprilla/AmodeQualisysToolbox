@@ -1,10 +1,10 @@
 clear; clc; close all;
 addpath(genpath('..\functions'));
 
-is_vsound_known = false;
+is_vsound_known = true;
 
 % read data
-[data, timestamps, indexes] = readTIFF_USsignal("..\data\experiment_wo_mocap\test_withMaxime\experiment1\p02_050\", 30, 2500);
+[data, timestamps, indexes] = readTIFF_USsignal("..\data\experiment_wo_mocap\test_withMaxime\experiment1\p30_100\", 30, 2500);
 
 % preparing constants
 data_spec.n_ust     = size(data, 1);
@@ -31,14 +31,14 @@ end
 
 if(is_vsound_known)
     % load window data
-    ust_config = readINI_ustconfig('..\data\experiment_wo_mocap\test_withMaxime\experiment1\watertest_LBUB_050.ini', data_spec);
+    ust_config = readINI_ustconfig('..\data\experiment_wo_mocap\test_withMaxime\experiment1\watertest_LBUB_100.ini', data_spec);
     % define window range
     ust_config.WindowRange = [ust_config.WindowLowerBound ust_config.WindowUpperBound];
     % convert windows in mm to windows in index
     ust_config.WindowRange_i = floor(ust_config.WindowRange/us_spec.index2distance_constant + 1);
 else
     % this is tricky
-    ust_config.WindowRange = repmat([5, 7],  data_spec.n_ust, 1) .* 1e-6; % in seconds
+    ust_config.WindowRange = repmat([5, 14],  data_spec.n_ust, 1) .* 1e-6; % in seconds
     % convert windows in mm to windows in index
     ust_config.WindowRange_i = floor(ust_config.WindowRange/us_spec.index2time_constant + 1);
 end
@@ -52,7 +52,7 @@ path_barkercode = '..\data\kenans_barkercode.txt';
 addpath('..\functions\displays');
 
 % process the data
-probeNumber_toShow = 2;
+probeNumber_toShow = 30;
 
 if(is_vsound_known)
     xaxis_clipped = xaxis_mm(ust_config.WindowRange_i(probeNumber_toShow, 1):ust_config.WindowRange_i(probeNumber_toShow, 2));
@@ -68,6 +68,7 @@ for current_frame=1:data_spec.n_frames
 
     % display a-mode
     display_amode( axes1, ...
+                   display_mode, ...
                    probeNumber_toShow, ...
                    current_frame, ...
                    correlated_clipped, ...
@@ -78,10 +79,6 @@ for current_frame=1:data_spec.n_frames
 
     % display the peak
 	display_peak_amode(axes1, allpeaks, display_mode, probeNumber_toShow, current_frame, 'plot_peak');
-    
-    if(current_frame==400)
-        break;
-    end
     
     drawnow;
 end

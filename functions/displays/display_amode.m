@@ -1,4 +1,4 @@
-function display_amode(current_axes, probeNumber_toShow, timestamp_toShow, data, envelope_data, x_axis_values, tag1, tag2)
+function display_amode(current_axes, display_mode, probeNumber_toShow, timestamp_toShow, data, envelope_data, x_axis_values, tag1, tag2)
 
 % just to make sure the plot is clean
 delete(findobj(current_axes, 'Tag', tag1));
@@ -51,8 +51,16 @@ if(~isempty(envelope_data))
     
     % show the envelope
     yyaxis(current_axes, 'right');
-    plot(current_axes, x_axis_values, data_toShow, '-', 'Color', 'r', 'LineWidth',1.5, 'Tag', tag2);     
-    xlabel(current_axes, 'Distance (mm)');
+    plot(current_axes, x_axis_values, data_toShow, '-', 'Color', 'r', 'LineWidth',1.5, 'Tag', tag2);
+
+    if (strcmp(display_mode, 'distance'))
+        xlabel(current_axes, 'Distance (mm)');
+    elseif (strcmp(display_mode, 'time'))
+        xlabel(current_axes, 'Time ($\mu$s)', 'Interpreter', 'Latex');
+    else
+        warning("Can not recognize the display mode for A-mode, specified as 'location' (found in display_amode)");
+        xlabel(current_axes, 'Distance (mm)');
+    end
     ylabel(current_axes, 'Envelop Amplitude');
     ylim(current_axes, y_limit);
     title(current_axes, sprintf("A-Mode Probe #%d", probeNumber_toShow));
