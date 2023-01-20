@@ -11,7 +11,7 @@
 % 1. Estimated window for bone detection
 % 2. Cleaned bone peak data
 
-clc; clear; close all;
+clear; close all;
 
 % add path for reading signal
 addpath('../functions');
@@ -34,11 +34,12 @@ us_spec.sample_rate = 50 * 1e6;
 us_spec.index2distance_constant  = (1e3 * us_spec.v_sound) / (2 * us_spec.sample_rate);
 
 % signal processing to get m-mode data
-[envelope_data, ~] = process_USsignal(USData, data_spec, us_spec, '../data/kenans_barkercode.txt');
+% [envelope_data, ~] = process_USsignal(USData, data_spec, us_spec, '../data/kenans_barkercode.txt');
+[envelope_data, ~] = process_USsignal3(USData, data_spec, us_spec, '../data/kenans_barkercode.txt', 'cwt1');
 
 %% Preparing variables and constants
 
-clc; close all;
+close all;
 clearvars -except USData envelope_data data_spec us_spec dname;
 
 n_probes  = size(USData,1);
