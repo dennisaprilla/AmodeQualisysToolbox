@@ -14,6 +14,7 @@ if ( iscell(data) )
 else
     data_toShow = data(probeNumber_toShow, :, timestamp_toShow);
 end
+% y_limit = [min(data_toShow), max(data_toShow)];
 
 % show a-mode
 yyaxis(current_axes, 'left');
@@ -26,11 +27,12 @@ axis(current_axes, 'tight');
 % correlated data, so we can the y limit as default
 if(~isempty(envelope_data))
     y_limit = [min(data_toShow), max(data_toShow)];
+
 % however, if the user really put raw data, the near-field interference is
 % quite concerning since it is just too big and will makes other part of
 % the signal flat, so let's cut the y limit
 else
-    y_limit = [min(data_toShow), max(data_toShow)];
+    y_limit = [-max(data_toShow), max(data_toShow)];
 end
 ylim(current_axes, y_limit);
 
@@ -48,6 +50,7 @@ if(~isempty(envelope_data))
     else
         data_toShow = envelope_data(probeNumber_toShow, :, timestamp_toShow);
     end
+    % y_limit = [-max(data_toShow), max(data_toShow)];
     
     % show the envelope
     yyaxis(current_axes, 'right');
@@ -66,6 +69,10 @@ if(~isempty(envelope_data))
     title(current_axes, sprintf("A-Mode Probe #%d", probeNumber_toShow));
 
 end
+
+% yyaxis(current_axes, 'left');
+% ylim(current_axes, y_limit);
+% yyaxis(current_axes, 'right');
 
 grid(current_axes, 'on');
 

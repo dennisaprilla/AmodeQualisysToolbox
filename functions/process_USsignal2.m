@@ -1,4 +1,4 @@
-function [USsignals_envelop, processed_USsignal] = process_USsignal3(data, data_spec, us_spec, path_barkercode, processmode)
+function [USsignals_envelop, processed_USsignal] = process_USsignal2(data, data_spec, us_spec, path_barkercode, processmode)
 
 % preparing constants for peak detection
 envelop_windowlength = 50;
@@ -64,7 +64,7 @@ for j=1:data_spec.n_frames
             
             % 4) Envelope
             S_envelop = envelope(USsignals_corrbarker(i,:,j), envelop_windowlength, 'analytic');
-            S_envelop = smoothdata(S_envelop, 'gaussian', 20);
+            S_envelop = smoothdata(S_envelop, 'gaussian', 50);
             USsignals_envelop(i,:,j)  = S_envelop .* sigFilt;
 
         elseif(strcmp(processmode, 'cwt1'))

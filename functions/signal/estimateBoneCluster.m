@@ -41,8 +41,11 @@ function [f, data_cleaned, cluster_idx] = estimateBoneCluster(peaks, clusterpara
 % f                       A spline interpolation matlab object. To get the
 %                         data from this object, use feval(f, X) function.
 %
-% data_cleaned            Cleaned data from outliers, the data that is used
-%                         for curve fitting.
+% data_cleaned            A Mx2 matrix, first column is timestamp, second
+%                         column is the depth, each rows is observation. 
+%                         Cleaned data from outliers, the data that is used
+%                         for curve fitting. You can use this data to plot
+%                         to the M-mode space image.
 %
 % cluster_idx             A vector of indices specifying which cluster a 
 %                         data point belongs to.
@@ -128,9 +131,13 @@ end
 data_cleaned = cell2mat(group_member_cleaned');
 
 % we assume the data is better now, so let's fit the curve
-f = fit( data_cleaned(:,1), ...
-         data_cleaned(:,2), ...
-         'smoothingspline','SmoothingParam',0.005);
+if(~isempty(data_cleaned))
+    f = fit( data_cleaned(:,1), ...
+             data_cleaned(:,2), ...
+             'smoothingspline','SmoothingParam',0.005);
+else
+    f = [];
+end
 
 %% 4. DISPLAY (FOR DEBUGGING PURPOSE)
 

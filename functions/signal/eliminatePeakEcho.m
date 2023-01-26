@@ -6,6 +6,8 @@ function [peak_idx_softtissues, peak_idx_bone, peak_idx_echo] = eliminatePeakEch
 
 % variable to collect the possible echoes
 peak_idx_echo = [];
+peak_idx_bone = [];
+peak_idx_softtissues = [];
 
 % loop from the end peaks to the begining
 for current_peak = length(locs):-1:2
